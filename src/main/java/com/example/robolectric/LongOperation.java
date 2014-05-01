@@ -1,8 +1,13 @@
 package com.example.robolectric;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.R;
@@ -19,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 public class LongOperation extends AsyncTask<String, Void, String> {
 
@@ -83,27 +89,66 @@ public class LongOperation extends AsyncTask<String, Void, String> {
     }
 
     protected void onPostExecute(String result) {
+
+
+
+
+
+
+
+
+
         // NOTE: You can call UI Element here.
 
         // Close progress dialog
         Dialog.dismiss();
         String OutputData = "";
+        ArrayList<String> titles = new ArrayList<String>();
+        ArrayList<String> imageLinks = new ArrayList<String>();
+        ArrayList<String> webLinks = new ArrayList<String>();
         JSONObject jsonResponse;
         try {
             jsonResponse = new JSONObject(Content);
             JSONArray jsonMainNode = jsonResponse.optJSONArray("movies");
+            if(jsonMainNode == null) return;
             int lengthJsonArr = jsonMainNode.length();
             for (int i = 0; i < lengthJsonArr; i++) {
                 JSONObject jsonChildNode = jsonMainNode.getJSONObject(i);
                 String name = jsonChildNode.optString("title");
                 OutputData += name + "\n";
+                titles.add(name);
+                imageLinks.add(jsonChildNode.getJSONObject("posters").optString("thumbnail"));
+                webLinks.add(jsonChildNode.getJSONObject("links").optString("alternate"));
             }
 
             result = OutputData;
             Log.d("sahil", result);
-            TextView tv = (TextView) act.findViewById(R.id.textView);
-            tv.setText(result);
-        } catch (JSONException e) {
+            //TextView tv = (TextView) act.findViewById(R.id.textView);
+            //tv.setText(result);
+
+            ListView lv = (ListView) act.findViewById(R.id.listView);
+
+            Movie[] movies = new Movie[titles.size()];
+            for(int i = 0; i < titles.size(); i++){
+                movies[i] = new Movie(i, titles.get(i), imageLinks.get(i), webLinks.get(i));
+            }
+
+
+            MovieAdapter adapter = new MovieAdapter(act, R.layout.movielayout, movies);
+
+            lv.setAdapter(adapter);
+            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    Log.d("sahil", (String) view.getTag());
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse((String) view.getTag()));
+                    act.startActivity(browserIntent);
+
+                }
+            });
+
+
+        } catch (Exception e) {
 
             e.printStackTrace();
         }

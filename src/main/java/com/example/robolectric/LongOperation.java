@@ -43,6 +43,7 @@ public class LongOperation extends AsyncTask<String, Void, String> {
 
     protected void onPreExecute() {
         Log.d("sahil", "preexecute");
+        System.err.println("search preexec");
         Dialog = new ProgressDialog(act);
         Dialog.setMessage("Please wait..");
         Dialog.show();
@@ -78,6 +79,7 @@ public class LongOperation extends AsyncTask<String, Void, String> {
             HttpGet httpGet = new HttpGet(urls[0]);
             HttpResponse response = httpClient.execute(httpGet);
             Content = inputStreamToString(response.getEntity().getContent()).toString();
+            System.err.println("Talked to server");
 
         } catch (Exception ex) {
             // Error = ex.getMessage();
@@ -88,12 +90,13 @@ public class LongOperation extends AsyncTask<String, Void, String> {
         return null;
     }
 
+
     protected void onPostExecute(String result) {
 
 
 
 
-
+        System.err.println("post exec");
 
 
 
@@ -103,9 +106,10 @@ public class LongOperation extends AsyncTask<String, Void, String> {
         // Close progress dialog
         Dialog.dismiss();
         String OutputData = "";
-        ArrayList<String> titles = new ArrayList<String>();
-        ArrayList<String> imageLinks = new ArrayList<String>();
-        ArrayList<String> webLinks = new ArrayList<String>();
+        //ArrayList<String> titles = new ArrayList<String>();
+        //ArrayList<String> imageLinks = new ArrayList<String>();
+        //ArrayList<String> webLinks = new ArrayList<String>();
+        ArrayList<JSONObject> jsonMovies = new ArrayList<JSONObject>();
         JSONObject jsonResponse;
         try {
             jsonResponse = new JSONObject(Content);
@@ -114,11 +118,12 @@ public class LongOperation extends AsyncTask<String, Void, String> {
             int lengthJsonArr = jsonMainNode.length();
             for (int i = 0; i < lengthJsonArr; i++) {
                 JSONObject jsonChildNode = jsonMainNode.getJSONObject(i);
+                jsonMovies.add(jsonChildNode);
                 String name = jsonChildNode.optString("title");
                 OutputData += name + "\n";
-                titles.add(name);
-                imageLinks.add(jsonChildNode.getJSONObject("posters").optString("thumbnail"));
-                webLinks.add(jsonChildNode.getJSONObject("links").optString("alternate"));
+                //titles.add(name);
+                //imageLinks.add(jsonChildNode.getJSONObject("posters").optString("thumbnail"));
+                //webLinks.add(jsonChildNode.getJSONObject("links").optString("alternate"));
             }
 
             result = OutputData;
@@ -128,9 +133,24 @@ public class LongOperation extends AsyncTask<String, Void, String> {
 
             ListView lv = (ListView) act.findViewById(R.id.listView);
 
-            Movie[] movies = new Movie[titles.size()];
-            for(int i = 0; i < titles.size(); i++){
-                movies[i] = new Movie(i, titles.get(i), imageLinks.get(i), webLinks.get(i));
+            final Movie[] movies = new Movie[jsonMovies.size()];
+            System.err.println("length returned: " + movies.length);
+            for(int i = 0; i < jsonMovies.size(); i++){
+                JSONObject curJSON= jsonMovies.get(i);
+                String title = curJSON.optString("title");
+                String imageLink = curJSON.getJSONObject("posters").getString("thumbnail");
+                String rating = curJSON.getString("mpaa_rating");
+                String releaseDate = curJSON.optJSONObject("release_dates").optString("theater");
+                String webLink = curJSON.getJSONObject("links").optString("alternate");
+                String bigImageLink = curJSON.getJSONObject("posters").getString("detailed");
+                JSONArray castJSON = curJSON.getJSONArray("abridged_cast");
+                String[] cast = new String[castJSON.length()];
+                for(int x = 0; x < cast.length; x++){
+                    cast[x] = castJSON.getJSONObject(x).optString("name");
+                }
+                Movie temp = new Movie(i, title, imageLink, bigImageLink, webLink, rating, releaseDate, cast);
+                movies[i] = temp;
+                //movies[i] = new Movie(i, titles.get(i), imageLinks.get(i), webLinks.get(i));
             }
 
 
@@ -138,14 +158,26 @@ public class LongOperation extends AsyncTask<String, Void, String> {
 
             lv.setAdapter(adapter);
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    Log.d("sahil", (String) view.getTag());
-                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse((String) view.getTag()));
-                    act.startActivity(browserIntent);
+                    //Log.d("sahil", (String) view.getTag());
+                    //Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse((String) view.getTag()));
+                   // act.startActivity(browserIntent);
+                    Intent newIntent = new Intent(act, SecondaryActivity.class);
+                    newIntent.putExtra("title", movies[i].title);
+                    newIntent.putExtra("cast", movies[i].cast);
+                    newIntent.putExtra("releaseDate", movies[i].releaseDate);
+                    newIntent.putExtra("rating", movies[i].rating);
+                    newIntent.putExtra("webLink", movies[i].webLink);
+                    newIntent.putExtra("picLink", movies[i].bigImageLink);
+                    //newIntent.putExtra("largeImageLink" );
+                    act.startActivity(newIntent);
 
                 }
             });
+
+            System.err.println(lv.getChildCount());
 
 
         } catch (Exception e) {

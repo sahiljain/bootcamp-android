@@ -24,6 +24,7 @@ public class MovieAdapter extends ArrayAdapter<Movie>{
     Context mContext;
     int layoutResourceId;
     Movie data[] = null;
+    Bitmap images[];
 
     public MovieAdapter(Context mContext, int layoutResourceId, Movie[] data) {
 
@@ -55,18 +56,25 @@ public class MovieAdapter extends ArrayAdapter<Movie>{
         // get the TextView and then set the text (item name) and tag (item ID) values
         TextView textViewItem = (TextView) convertView.findViewById(R.id.textViewItem);
         textViewItem.setText(objectItem.title);
-        textViewItem.setTag(objectItem.id);
+        //textViewItem.setTag(objectItem);
 
         ImageView img = (ImageView) convertView.findViewById(R.id.imageView);
-        String URL = objectItem.imageLink;
 
-        if(objectItem.image!=null)
-        img.setImageBitmap(objectItem.image);
+        if(objectItem.image!=null){
+            Log.i("sahil", "image not null");
+           img.setImageBitmap(objectItem.image);
+        }else{
+            Log.i("sahil", "image null");
+            if(img.getTag()==null)
+            objectItem.requestDownloadAndPlace(img);
+        }
+
         convertView.setTag(objectItem.webLink);
 
         return convertView;
 
     }
+
 
 
 

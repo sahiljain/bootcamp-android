@@ -7,13 +7,17 @@
     <uses-sdk android:minSdkVersion="18"
               android:targetSdkVersion="18"/>
     <uses-permission android:name="android.permission.INTERNET" />
-    <application android:name=".DeckardApplication">
+    <application android:name=".DeckardApplication" android:theme="@android:style/Theme.Holo.Light.NoActionBar">
 
         <activity android:name=".robolectric.DeckardActivity" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+
+        <activity android:name=".robolectric.SecondaryActivity">
+
         </activity>
 
     </application>

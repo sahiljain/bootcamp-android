@@ -1,12 +1,18 @@
 package com.example.activity;
 
-import android.app.Activity;
+import android.content.Intent;
+import android.os.Looper;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.R;
 import com.example.robolectric.DeckardActivity;
+import com.example.robolectric.Movie;
+import com.example.robolectric.SecondaryActivity;
 
 
 import org.junit.Before;
@@ -14,16 +20,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.shadows.ShadowActivity;
+import org.robolectric.shadows.ShadowHandler;
+import org.robolectric.shadows.ShadowIntent;
+import org.robolectric.shadows.ShadowListView;
 import org.robolectric.util.Transcript;
-
-import org.robolectric.shadows.ShadowToast;
-import org.w3c.dom.Text;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.fest.assertions.api.Assertions.doesNotHave;
 import static org.junit.Assert.assertEquals;
-import static org.hamcrest.CoreMatchers.equalTo;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
@@ -38,7 +43,7 @@ public class DeckardActivityRobolectricTest {
 
     @Before
     public void setup(){
-        activity = Robolectric.buildActivity(DeckardActivity.class).create().get();
+        activity = Robolectric.buildActivity(DeckardActivity.class).attach().create().start().resume().visible().get();
         transcript = new Transcript();
         Robolectric.getBackgroundScheduler().pause();
         Robolectric.getUiThreadScheduler().pause();
@@ -46,67 +51,114 @@ public class DeckardActivityRobolectricTest {
     }
 
     @Test
-    public void testActivityCreated() throws Exception {
+    public void testHomeActivityCreated() throws Exception {
+
         assertNotNull(activity);
     }
 
     @Test
-    public void testGUIElementsCreated() throws Exception {
+    public void testGUIMainActivity() throws Exception {
         Button btn = (Button) activity.findViewById(R.id.search_button);
         assertNotNull(btn);
 
-        TextView tv = (TextView) activity.findViewById(R.id.textView);
-        assertNotNull(tv);
-
         EditText et = (EditText) activity.findViewById(R.id.editText);
         assertNotNull(et);
+
+        ListView lv = (ListView) activity.findViewById(R.id.listView);
+        assertNotNull(lv);
     }
 
     @Test
-    public void testMovie() throws Exception {
+    public void testAPIAccessValid() throws Exception {
 
-        TextView tv = (TextView) activity.findViewById(R.id.textView);
+        EditText et = (EditText) activity.findViewById(R.id.editText);
+        et.setText("Rocky");
 
-        String field = "romeo";
-        String strURL = "http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey=4vfsqwf87nwsd2vyvzzjfjxb&q=" + field +  "&page_limit=10";
-        LongOperation lo = new LongOperation(activity, transcript);
-        lo.execute(strURL);
-
-        transcript.assertEventsSoFar("onPreExecute");
+        Button btn = (Button) activity.findViewById(R.id.search_button);
+        Robolectric.clickOn(btn);
 
         Robolectric.runBackgroundTasks();
-        transcript.assertEventsSoFar("doInBackground");
-        System.err.print(lo.get(1000, TimeUnit.MILLISECONDS));
-        assertThat(lo.get().length() > 0);
-
         Robolectric.runUiThreadTasks();
-        transcript.assertEventsSoFar("onPostExecute");
 
+        ListView lv = (ListView) activity.findViewById(R.id.listView);
+        Robolectric.runBackgroundTasks(); Robolectric.runUiThreadTasks();
+        //assertThat(lv.getAdapter().getCount() > 0);
+        //TextView title = (TextView) lv.getChildAt(0).findViewById(R.id.txtTitle);
+        //System.err.println(title.getText());
 
-        assertThat(tv.getText().length() > 0);
     }
 
     @Test
-    public void testInvalidMovie() throws  Exception {
-        TextView tv = (TextView) activity.findViewById(R.id.textView);
+    public void testAPIAccessInvalid() throws Exception {
 
-        String field = "rosfsdfsdfmeo";
-        String strURL = "http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey=4vfsqwf87nwsd2vyvzzjfjxb&q=" + field +  "&page_limit=10";
-        LongOperation lo = new LongOperation(activity, transcript);
-        lo.execute(strURL);
+        EditText et = (EditText) activity.findViewById(R.id.editText);
+        et.setText("lkjlkjlk");
 
-        transcript.assertEventsSoFar("onPreExecute");
+        Button btn = (Button) activity.findViewById(R.id.search_button);
+        Robolectric.clickOn(btn);
 
         Robolectric.runBackgroundTasks();
-        transcript.assertEventsSoFar("doInBackground");
-        System.err.print(lo.get(1000, TimeUnit.MILLISECONDS));
-        assertThat(lo.get().length() > 0);
-
         Robolectric.runUiThreadTasks();
-        transcript.assertEventsSoFar("onPostExecute");
 
-
-        assertThat(tv.getText().length() == 0);
+        ListView lv = (ListView) activity.findViewById(R.id.listView);
+        assertThat(lv.getAdapter().getCount() == 0);
 
     }
+
+    @Test
+    public void testNewActivityStarted() throws Exception {
+
+        EditText et = (EditText) activity.findViewById(R.id.editText);
+        et.setText("rocky");
+
+        Button btn = (Button) activity.findViewById(R.id.search_button);
+        Robolectric.clickOn(btn);
+
+        Robolectric.runBackgroundTasks();
+        Robolectric.runUiThreadTasks();
+
+        ListView lv = (ListView) activity.findViewById(R.id.listView);
+        ShadowHandler.idleMainLooper();
+        ShadowListView  slv = Robolectric.shadowOf(lv);
+        slv.performItemClick(0);
+        ShadowActivity sa = Robolectric.shadowOf(activity);
+        Intent si = sa.getNextStartedActivity();
+
+        System.err.println(si.getComponent().getClassName());
+        assertEquals(SecondaryActivity.class.getName(), si.getComponent().getClassName());
+    }
+
+    @Test
+    public void testGUINewActivity() throws Exception {
+
+        Intent newIntent = new Intent(activity, SecondaryActivity.class);
+        newIntent.putExtra("title", "Rocky");
+        newIntent.putExtra("cast", new String[]{"Sylvester Stallone", "Jennifer Aniston"});
+        newIntent.putExtra("releaseDate", "2014/04/28");
+        newIntent.putExtra("rating", "PG");
+        newIntent.putExtra("webLink", "http://www.google.ca");
+        newIntent.putExtra("picLink", "http://images.rottentomatoescdn.com/images/redesign/poster_default.gif");
+        SecondaryActivity secondaryActivity = Robolectric.buildActivity(SecondaryActivity.class).withIntent(newIntent).attach().create().start().resume().visible().get();
+
+        ImageView img = (ImageView) secondaryActivity.findViewById(R.id.imgMain);
+        assertNotNull(img);
+
+        TextView title = (TextView) secondaryActivity.findViewById(R.id.txtTitle);
+        assertNotNull(title);
+        assertEquals("Rocky", title.getText());
+
+        TextView cast = (TextView) secondaryActivity.findViewById(R.id.txtCast);
+        assertNotNull(cast);
+        assertEquals("Sylvester Stallone\nJennifer Aniston\n", cast.getText());
+
+        TextView rating = (TextView) secondaryActivity.findViewById(R.id.txtRating);
+        assertNotNull(rating);
+        assertEquals("PG", rating.getText());
+
+        TextView releaseDate = (TextView) secondaryActivity.findViewById(R.id.txtReleaseDate);
+        assertNotNull(releaseDate);
+        assertEquals("2014/04/28", releaseDate.getText());
+
+    }
+
 }

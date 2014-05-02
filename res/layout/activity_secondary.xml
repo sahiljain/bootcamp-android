@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+    <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Title Here"
+            android:id="@+id/txtTitle"
+            android:layout_below="@+id/imgMain"
+            android:layout_marginTop="10dp"
+            android:textSize="30dp"
+            android:layout_centerHorizontal="true" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imgMain"
+            android:src="@android:drawable/btn_star"
+            android:layout_alignParentTop="true"
+            android:scaleType="fitCenter"
+            android:minHeight="200dp"
+            android:paddingTop="10dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Cast: "
+            android:id="@+id/txtLBL"
+            android:layout_below="@+id/txtTitle"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="50dp"
+            android:layout_marginLeft="40dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Medium Text"
+            android:id="@+id/txtCast"
+            android:layout_alignTop="@+id/txtLBL"
+            android:layout_toRightOf="@+id/txtLBL"
+
+             />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Rating:"
+            android:id="@+id/txtLBL2"
+            android:layout_below="@id/txtCast"
+            android:layout_marginTop="40dp"
+            android:layout_alignLeft="@id/txtLBL"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Medium Text"
+            android:id="@+id/txtRating"
+            android:layout_alignTop="@+id/txtLBL2"
+            android:layout_toRightOf="@+id/txtLBL2" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Release Date: "
+            android:id="@+id/txtLBL3"
+            android:layout_below="@id/txtRating"
+            android:layout_alignLeft="@id/txtLBL2"
+            android:layout_marginTop="50dp"
+            android:paddingBottom="20dp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Medium Text"
+            android:id="@+id/txtReleaseDate"
+            android:layout_alignTop="@+id/txtLBL3"
+            android:layout_toRightOf="@+id/txtLBL3" />
+
+    </RelativeLayout>
+
+
+
+    </ScrollView>
+
+</LinearLayout>

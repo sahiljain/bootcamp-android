@@ -7,6 +7,7 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -18,35 +19,55 @@ public class Movie {
     public String title;
     public String imageLink;
     public String webLink;
-    public Bitmap image;
+    public String rating;
+    public String releaseDate;
+    public String[] cast;
+    public String bigImageLink;
+    public Bitmap image = null;
 
-    public Movie(int id, String title, String imgLink, String weblnk) {
+    public Movie(int id, String title, String imgLink, String bigImageLink, String weblnk, String rating, String releaseDate, String[] cast) {
         this.id = id;
         this.title = title;
         this.imageLink = imgLink;
         this.webLink = weblnk;
-        image = null;
+        this.bigImageLink = bigImageLink;
+        this.rating = rating;
+        this.cast = cast;
+        this.releaseDate = releaseDate;
 
-        try {
-            image = new DownloadImageTask().execute().get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+        //download an image here
+    }
+
+    public void requestDownloadAndPlace(ImageView img) {
+        img.setTag(Boolean.TRUE);
+        new DownloadImageTask(img, imageLink).execute();
+        Log.i("sahil", imageLink);
+
     }
 
     public class DownloadImageTask extends AsyncTask<Void, Void, Bitmap> {
+        ImageView img;
+        String link;
+
+        public DownloadImageTask(ImageView img, String link){
+            super();
+            this.link = link;
+            this.img = img;
+        }
 
         @Override
         protected Bitmap doInBackground(Void... what) {
 
-            return download_Image(imageLink);
+            return download_Image(link);
         }
 
         @Override
         protected void onPostExecute(Bitmap result) {
-            //imageView.setImageBitmap(result);
+            img.setImageBitmap(result);
+
+            img.setTag(Boolean.TRUE);
+            image = result;
+            img.setTag(null);
         }
 
         private Bitmap download_Image(String url) {
@@ -63,4 +84,6 @@ public class Movie {
         }
 
     }
+
+
 }

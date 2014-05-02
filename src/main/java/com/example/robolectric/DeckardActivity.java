@@ -25,6 +25,7 @@ public class DeckardActivity extends Activity {
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                System.err.println("clicked");
                 Log.d("test", "search button clicked");
                 String field = editText.getText().toString();
                 String strURL = "http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey=4vfsqwf87nwsd2vyvzzjfjxb&q=" + field +  "&page_limit=10";

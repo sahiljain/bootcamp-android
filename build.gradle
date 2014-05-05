@@ -59,6 +59,9 @@ androidTest {
 }
 
 dependencies {
+
+    compile "com.android.support:appcompat-v7:18.0.+"
+
     repositories {
         mavenCentral()
         maven {
